@@ -1,6 +1,7 @@
-import Account from './identity'
+import { Identity, SeedAccount } from './identity'
 import { URL, URLSearchParams } from 'url'
 import axiosLib, { AxiosInstance } from 'axios'
+import { NotAuthenticatedError } from './errors'
 
 export interface ClientConfig {
   /** Which network does the mnemonic (seed phrase) belong to? */
@@ -20,10 +21,9 @@ export interface ClientConfig {
  */
 export class BaseClient {
   /** 
-   * Client's account instance, used for signing transactions 
-   * @internal
+   * Client's identity instance, used for generating and signing transactions 
    */
-  public identity: Account
+  public identity?: Identity
 
   private axios: AxiosInstance
 
@@ -45,12 +45,6 @@ export class BaseClient {
   //  */
   // readonly txn: typeof apiMethods.transaction
 
-  /**
-   * Create a client for a single account and node
-   * @param mnemonic The seed phrase of the account
-   * @param nodeUrl URL of the BitClout node. This is bitclout.com by default, though it is recommended to host your own node.
-   * @param cfg Client config
-   */
   constructor (mnemonic: string, nodeUrl: string = 'https://bitclout.com', cfg?: ClientConfig) {
     try {
       if (!nodeUrl) throw Error()
@@ -59,7 +53,7 @@ export class BaseClient {
       throw Error('Please pass a valid node URL to the client constructor')
     }
 
-    this.identity = new Account(mnemonic, cfg?.network)
+    this.identity = new SeedAccount(mnemonic, cfg?.network)
 
     this.axios = axiosLib.create({
       baseURL: nodeUrl + '/api/v0/',
@@ -133,8 +127,9 @@ export class BaseClient {
    * @param txn The unsigned transaction hex
    * @returns The API response
    */
-   public signAndSubmitTransaction<T extends Record<string, any>>(txn: string): Promise<T> {
-    return this.submitTransaction(this.identity.signTransaction(txn))
+  public async signAndSubmitTransaction<T extends Record<string, any>>(txn: string): Promise<T> {
+    if (!this.identity) throw new NotAuthenticatedError('transaction')
+    return this.submitTransaction(await this.identity.signTransaction(txn))
   }
 
   /**

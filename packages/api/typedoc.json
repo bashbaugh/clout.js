@@ -1,5 +1,5 @@
 {
-  "entryPoints": ["src/index.ts", "src/Client.ts"],
+  "entryPoints": ["src/index.ts"],
   "out": "docs",
   "excludeInternal": true,
   "excludePrivate": true,

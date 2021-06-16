@@ -1,4 +1,5 @@
 import { BaseClient } from './BaseClient'
+import { NotAuthenticatedError } from './errors'
 import * as api from './types'
 
 /**
@@ -12,7 +13,7 @@ import * as api from './types'
  * ```
  * @beta
  */
-export class Client extends BaseClient {
+export class BitcloutClient extends BaseClient {
   /**
    * Create a client for a single account and node
    * @param mnemonic The seed phrase of the account
@@ -48,6 +49,7 @@ export class Client extends BaseClient {
     /** Post body text */
     body: string
   ) {
+    if (!this.identity) throw new NotAuthenticatedError('submitPost')
     return this.handleTransactionRequest<api.PostSubmissionResponse>('submit-post', {
       UpdaterPublicKeyBase58Check: this.identity.bitcloutPublicKey,
       BodyObj: {

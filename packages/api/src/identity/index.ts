@@ -1,19 +1,13 @@
-import { ec } from 'elliptic'
-import { getBitcloutPublicKeyFromKeypair, getKeypairFromMnemonic, signTransactionHex } from './crypto'
+export * from './SeedAccount'
+export * from './WebAccount'
 
-export default class Account {
-  /** Account's secp256k1 keypair, derived from seed */
-  private keypair: ec.KeyPair
-
+export abstract class Identity {
   /** Public key shown on account's bitclout profile */
   public readonly bitcloutPublicKey: string
 
-  constructor (mnemonic: string, net: 'mainnet' | 'testnet' = 'mainnet') {
-    this.keypair = getKeypairFromMnemonic(mnemonic)
-    this.bitcloutPublicKey = getBitcloutPublicKeyFromKeypair(this.keypair, net)
+  constructor (publicKey: string) {
+    this.bitcloutPublicKey = publicKey
   }
 
-  public signTransaction (transactionHex: string) {
-    return signTransactionHex(transactionHex, this.keypair)
-  }
+  abstract signTransaction (transactionHex: string): Promise<string>
 }
