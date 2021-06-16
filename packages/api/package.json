@@ -37,7 +37,6 @@
     "@types/elliptic": "^6.4.12",
     "@types/hdkey": "^2.0.0",
     "@types/sha256": "^0.2.0",
-    "typedoc": "^0.20.36",
-    "typedoc-neo-theme": "^1.1.1"
+    "typedoc": "^0.20.36"
   }
 }

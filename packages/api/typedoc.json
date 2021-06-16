@@ -3,6 +3,5 @@
   "out": "docs",
   "excludeInternal": true,
   "excludePrivate": true,
-  "excludeProtected": true,
-  "theme": "../../node_modules/typedoc-neo-theme/bin/default"
+  "excludeProtected": true
 }
