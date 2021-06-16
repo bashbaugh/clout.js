@@ -1,0 +1,43 @@
+{
+  "name": "@cloutjs/api",
+  "version": "0.1.0",
+  "description": "API client",
+  "author": "Benjamin Ashbaugh <hi@benjaminashbaugh.me>",
+  "homepage": "https://github.com/bashbaugh/clout.js#readme",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "files": [
+    "dist/"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.yarnpkg.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bashbaugh/clout.js.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "docs": "typedoc --options typedoc.json src/index.ts",
+    "docs-dev": ""
+  },
+  "bugs": {
+    "url": "https://github.com/bashbaugh/clout.js/issues"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "bip39": "^3.0.4",
+    "bs58check": "^2.1.2",
+    "elliptic": "^6.5.4",
+    "hdkey": "^2.0.1",
+    "sha256": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/bs58check": "^2.1.0",
+    "@types/elliptic": "^6.4.12",
+    "@types/hdkey": "^2.0.0",
+    "@types/sha256": "^0.2.0",
+    "typedoc": "^0.20.36",
+    "typedoc-neo-theme": "^1.1.1"
+  }
+}

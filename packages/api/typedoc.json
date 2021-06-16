@@ -1,0 +1,8 @@
+{
+  "entryPoints": ["src/index.ts", "src/Client.ts"],
+  "out": "docs",
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "theme": "../../node_modules/typedoc-neo-theme/bin/default"
+}
