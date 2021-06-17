@@ -9,9 +9,5 @@
   "source": [{
     "path": "https://github.com/bashbaugh/clout.js/tree/main/",
     "line": "L"
-  }],
-  // "search": [{
-  //   "name": "WebAccount",
-  //   "subtitle": "Identity"
-  // }]
+  }]
 }

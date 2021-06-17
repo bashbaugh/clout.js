@@ -1,4 +1,4 @@
-import { Identity } from '.'
+import { Identity } from './Identity'
 import { ec } from 'elliptic'
 import { getBitcloutPublicKeyFromKeypair, getKeypairFromMnemonic, signTransactionHex } from './crypto'
 

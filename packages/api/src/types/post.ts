@@ -1,4 +1,5 @@
 import { BaseTxnSubmissionResponse } from "."
+import { ProfileEntryResponseFull } from "./user"
 
 // https://github.com/bitclout/backend/blob/main/routes/post.go#L56
 interface PostEntryResponseFull {

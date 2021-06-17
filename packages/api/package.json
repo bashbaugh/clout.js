@@ -6,6 +6,7 @@
   "homepage": "https://github.com/bashbaugh/clout.js#readme",
   "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist/"
   ],
@@ -17,9 +18,9 @@
     "url": "git+https://github.com/bashbaugh/clout.js.git"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1",
-    "docs": "typedoc --options typedoc.json src/index.ts",
-    "docs-dev": ""
+    "test": "mocha test ./test/**/*.ts --recursive -r ts-node/register --reporter nyan",
+    "docs": "typedoc --recursive --options typedoc.json src/index.ts",
+    "build": "rollup --config rollup.config.js"
   },
   "bugs": {
     "url": "https://github.com/bashbaugh/clout.js/issues"

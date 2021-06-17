@@ -1,5 +1,5 @@
 import { BaseClient, ClientConfig } from './BaseClient'
-import { NotAuthenticatedError } from './errors'
+import { InvalidConfigError, NotAuthenticatedError } from './errors'
 import { Identity, ReadonlyIdentity, SeedAccount, WebAccount } from './identity'
 import * as api from './types'
 
@@ -12,10 +12,14 @@ function isConfigWithIdentity (obj: any): obj is Partial<ClientConfig> & {
   || obj?.identity instanceof ReadonlyIdentity)
 }
 
+// Make sure this class is a valid Identity or ReadonlyIdentity
 function isIdentityInstance (obj: any): obj is Identity | ReadonlyIdentity {
-  return (obj?.identity instanceof WebAccount 
-  || obj?.identity instanceof SeedAccount
-  || obj?.identity instanceof ReadonlyIdentity)
+  // return (obj?.identity instanceof WebAccount 
+  // || obj?.identity instanceof SeedAccount
+  // || obj?.identity instanceof ReadonlyIdentity)
+  return typeof obj === 'object' 
+  && ((obj.canSign === true && (obj as object).hasOwnProperty('signTransaction')) || (obj.canSign === false))
+  && typeof obj.bitcloutPublicKey === 'string'
 }
 
 /**
@@ -32,24 +36,25 @@ function isIdentityInstance (obj: any): obj is Identity | ReadonlyIdentity {
 export class BitcloutClient extends BaseClient {
   /** 
    * Initialize a BitClout node client 
-   * @param nodeURL 
-   * URL of the BitClout node (without the final slash). This is bitclout.com by default, though it is recommended to host your own node.
    * @param identityArg
    * This will be the identity used by the client in requests and for signing transactions (optional).
    * 
    * It must be an instance of {@link WebAccount} (for sending requests on behalf of client-side users), 
-   * {@link SeedAccount} (for server-side bots **exclusively** - _NEVER ASK A USER FOR THEIR SEED PHRASE_), or 
-   * {@link ReadonlyIdentity} (which is just a read-only public key and can't sign transactions).
+   * {@link SeedAccount} (for server-side bots **exclusively** - _NEVER ASK A USER FOR THEIR SEED PHRASE_), 
+   * {@link ReadonlyIdentity} (which is just a read-only public key and can't sign transactions), or 
+   * any custom class that extends {@link Identity}.
    * 
    * You can also supply a 12-word seed phrase mnemonic if you want to automatically generate a {@link SeedAccount}. 
    * Or, pass a bitclout public key to automatically generate a {@link ReadonlyIdentity}. 
    * 
    * Finally, if you pass null or undefined, the client will be created without an identity, but won't be able to access many endpoints.
+   * @param nodeURL 
+   * URL of the BitClout node (without the final slash). This is bitclout.com by default, though it is recommended to host your own node.
    * @param otherCfg Other configuration for the client
    */
   constructor (
+    identityArg?: WebAccount | SeedAccount | Identity | ReadonlyIdentity | string | null,
     nodeURL: string = 'https://bitclout.com',
-    identityArg?: WebAccount | SeedAccount | ReadonlyIdentity | string | null, 
     otherCfg?: Partial<ClientConfig>
   ) {
     let identity: Identity | ReadonlyIdentity | undefined
@@ -61,7 +66,7 @@ export class BitcloutClient extends BaseClient {
       try {
         identity = new SeedAccount(identityArg)
       } catch {
-        throw Error('Unable to generate seed account from mnemonic')
+        throw new InvalidConfigError('Unable to generate seed account from mnemonic')
       }
     }
     // Assume it's a public key:
@@ -76,7 +81,7 @@ export class BitcloutClient extends BaseClient {
     // }
     // If the identity arg was still passed it must be invalid:
     else if (!!identityArg) {
-      throw Error('Invalid identity argument. Must be an instance of WebAccount, SeedAccount, ReadonlyIdentity; or a seed phrase or public key or null.')
+      throw new InvalidConfigError('Invalid identity argument. Must be an instance of WebAccount, SeedAccount, ReadonlyIdentity; or a seed phrase or public key or null.')
     }
     // Otherwise, there is no identity (which is fine).
 

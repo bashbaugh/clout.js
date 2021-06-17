@@ -28,3 +28,13 @@ export class NotAuthenticatedError extends Error {
     this.name = 'SigningError'
   }
 }
+
+/**
+ * @ignore
+ */
+ export class InvalidConfigError extends Error {
+  constructor(msg?: string) {
+    super(`${msg}`)
+    this.name = 'InvalidConfigError'
+  }
+}

@@ -1,4 +1,4 @@
-import { Identity } from '.'
+import { Identity } from './Identity'
 import { NoWindowError, SigningError } from '../errors'
 import { nanoid } from 'nanoid'
 
@@ -21,7 +21,7 @@ export interface LoginReturnType {
 
 // TODO additional instructions about iframe, etc.
 /**
- * Can be used client-side to interact with the BitClout identity service
+ * Can be used client-side to interact with the BitClout identity service. This is 
  */
 export class WebAccount extends Identity {
   private authData: BitcloutAuthData
@@ -60,6 +60,7 @@ export class WebAccount extends Identity {
     this.iframe.contentWindow?.postMessage(msg, '*')
   }
 
+  /** Window message listener */
   private static onMessage(m: MessageEvent) {
     if (m.origin.startsWith('https://identity.bitclout.com')) {
       if (m.data.method === 'initialize') {

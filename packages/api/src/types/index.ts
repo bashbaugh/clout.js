@@ -1,6 +1,8 @@
 export * from './post'
 export * from './user'
 
+// Why weren't this files working as d.ts files...
+
 export interface Transaction <MetaType> {
   TxInputs: {
     TxID:         number[],

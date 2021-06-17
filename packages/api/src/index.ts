@@ -1,7 +1,14 @@
 
 export * from './BitcloutClient'
 export { ClientConfig } from './BaseClient'
-export { WebAccount, SeedAccount, ReadonlyIdentity, BitcloutAuthData, LoginReturnType } from './identity'
+export { 
+  Identity, 
+  WebAccount, 
+  SeedAccount, 
+  ReadonlyIdentity, 
+  BitcloutAuthData, 
+  LoginReturnType 
+} from './identity'
 export * from './errors'
 export * from './types'
 
