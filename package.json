@@ -10,7 +10,7 @@
   "author": "Benjamin Ashbaugh <hi@benjaminashbaugh.me>",
   "license": "MIT",
   "scripts": {
-    "docs": "rm -r docs-out && typedoc --options typedoc.json",
+    "docs": "rm -rf docs-out && typedoc --options typedoc.json",
     "test": "lerna run test",
     "format": "prettier --write \"packages/**/*.ts\"",
     "lint": "tslint -p tsconfig.json"
