@@ -112,6 +112,11 @@ export class BitcloutClient extends BaseClient {
     return res
   } 
 
+  /** Get state of BitClout, such as cost of profile creation and diamond tiers*/
+  public getAppState() {
+    return this.callApi<api.GetAppStateResponse>('get-app-state', {})
+  }
+
   /** Submit a post */
   public async submitPost(
     /** Post body text */

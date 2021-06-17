@@ -21,6 +21,10 @@
 					]
         },
         {
+          "title": "Endpoints",
+          "source": "./docs/endpoints.md"
+        },
+        {
           "title": "Errors",
           "source": "./docs/errors.md"
         }

@@ -3,6 +3,7 @@
     "packages/api/src/index.ts"
   ],
   "out": "docs-out",
+  "includeVersion": true,
   "name": "Clout.JS",
   "readme": "./README.md",
   "excludeInternal": true,

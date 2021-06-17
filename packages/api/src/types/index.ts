@@ -30,3 +30,21 @@ export interface GetExchangeRateResponse {
   USDCentsPerBitcoinExchangeRate: number
 }
 
+export interface GetAppStateResponse {
+  AmplitudeKey:                       string
+	AmplitudeDomain:                    string
+	MinSatoshisBurnedForProfileCreation:number
+  /** Is this node on the testnet? */
+	IsTestnet:                          boolean
+  /** The support email associated with this node */
+	SupportEmail:                       string
+	ShowProcessingSpinners:             boolean
+	HasStarterBitCloutSeed:             boolean
+	HasTwilioAPIKey:                    boolean
+  /** Fee to create a BitClout profile */
+	CreateProfileFeeNanos:              number
+	CompProfileCreation:                boolean
+  /** Map of diamond tiers to values */
+	DiamondLevelMap:                    Record<number, number>
+	HasWyreIntegration:                 boolean
+}
