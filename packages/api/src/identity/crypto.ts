@@ -27,14 +27,14 @@ export function getEcKeypairFromPrivateSeedKey(seed: Buffer | string) {
 export const getKeypairFromMnemonic = (mnemonic: string) => 
   getEcKeypairFromPrivateSeedKey(getKeychainFromMnemonic(mnemonic).privateKey)
 
-//https://github.com/bitclout/identity/blob/main/src/lib/bindata/util.ts
+// https://github.com/bitclout/identity/blob/main/src/lib/bindata/util.ts
 function uvarint64ToBuf (uint: number): Buffer {
   const result = []
   while (uint >= 0x80) {
-    result.push((uint & 0xFF) | 0x80)
-    uint >>>= 7
+    // @ts-ignore
+    result.push((uint & 0xFF) | 0x80); uint >>>= 7;
   }
-
+  // @ts-ignore
   result.push(uint | 0)
   return Buffer.from(result)
 }

@@ -1,0 +1,12 @@
+{
+  "entryPoints": [
+    "packages/api/src/index.ts"
+  ],
+  "out": "docs-out",
+  "name": "Clout.JS",
+  "readme": "./README.md",
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "theme": "pages-plugin"
+}

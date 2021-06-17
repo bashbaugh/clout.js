@@ -9,8 +9,26 @@
   "repository": "https://github.com/bashbaugh/clout.js.git",
   "author": "Benjamin Ashbaugh <hi@benjaminashbaugh.me>",
   "license": "MIT",
+  "scripts": {
+    "docs": "rm -r docs-out && typedoc --options typedoc.json",
+    "test": "lerna run test",
+    "format": "prettier --write \"packages/**/*.ts\"",
+    "lint": "tslint -p tsconfig.json"
+  },
   "devDependencies": {
+    "@rollup/plugin-typescript": "^8.2.1",
+    "@types/chai": "^4.2.18",
+    "@types/mocha": "^8.2.2",
+    "chai": "^4.3.4",
     "lerna": "^4.0.0",
+    "mocha": "^9.0.0",
+    "prettier": "^2.3.1",
+    "rollup": "^2.52.1",
+    "ts-node": "^10.0.0",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typedoc": "^0.20.37",
+    "typedoc-plugin-pages-fork": "^0.0.1",
     "typescript": "4.2"
   }
 }

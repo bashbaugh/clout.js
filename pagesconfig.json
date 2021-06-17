@@ -1,0 +1,38 @@
+{
+  "reflectionNavigationTitle": "API Reference",
+  "enableSearch": true,
+  "replaceGlobalsPage": false,
+  "groups": [
+    {
+      "title": "Documentation",
+      "pages": [
+        {
+          "title": "Getting Started",
+          "source": "./docs/getting-started.md"
+        },
+        {
+          "title": "Identity & Authentication",
+          "source": "./docs/identity-types.md",
+          "children": [
+						{
+							"title": "Using WebAccount",
+							"source": "./docs/WebAccount.md"
+						}
+					]
+        },
+        {
+          "title": "Errors",
+          "source": "./docs/errors.md"
+        }
+      ]
+    }, {
+      "title": "Development",
+      "pages": [
+        {
+          "title": "Contribution",
+          "source": "./docs/contributing.md"
+        }
+      ]
+    }
+  ]
+}
