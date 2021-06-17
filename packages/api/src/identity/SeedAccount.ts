@@ -5,7 +5,7 @@ import { getBitcloutPublicKeyFromKeypair, getKeypairFromMnemonic, signTransactio
 /**
  * Implements methods for signing transactions from a single BitClout account private key
  */
- export class SeedAccount extends Identity {
+export class SeedAccount extends Identity {
   /** Account's secp256k1 keypair, derived from seed */
   private keypair: ec.KeyPair
 
@@ -20,6 +20,10 @@ import { getBitcloutPublicKeyFromKeypair, getKeypairFromMnemonic, signTransactio
     this.keypair = keypair
   }
 
+  /**
+   * Signs a transaction hex
+   * @returns The signed transaction hex
+   */
   public async signTransaction (transactionHex: string) {
     return signTransactionHex(transactionHex, this.keypair)
   }

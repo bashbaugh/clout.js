@@ -1,4 +1,4 @@
-import { BaseTransactionSubmissionResponse } from "."
+import { BaseTxnSubmissionResponse } from "."
 
 // https://github.com/bitclout/backend/blob/main/routes/post.go#L56
 interface PostEntryResponseFull {
@@ -62,6 +62,6 @@ export interface TxnMetadataSubmitPost {
   IsHidden: boolean
 }
 
-export type PostSubmissionResponse = BaseTransactionSubmissionResponse<TxnMetadataSubmitPost> & {
+export type PostSubmissionResponse = BaseTxnSubmissionResponse<TxnMetadataSubmitPost> & {
   PostEntryResponse:  PostEntryResponse
 }

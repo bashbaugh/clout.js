@@ -1,5 +1,5 @@
 import { Identity } from '.'
-import { NoWindowError } from '../errors'
+import { NoWindowError, SigningError } from '../errors'
 import { nanoid } from 'nanoid'
 
 export interface BitcloutAuthData {
@@ -52,7 +52,11 @@ export class WebAccount extends Identity {
     this.iframe = iframe
   }
 
-  private postMessage(msg: Record<string, any>) {
+  /**
+   * Posts a message to the identity service iframe. {@link https://docs.bitclout.com/devs/identity-api#iframe-context | Learn more}.
+   * @param msg The message (in JSON format). Must contain an `id` if a response is expected (see {@link WebAccount.waitForResponse})
+   */
+  public postMessage(msg: Record<string, any>) {
     this.iframe.contentWindow?.postMessage(msg, '*')
   }
 
@@ -71,7 +75,12 @@ export class WebAccount extends Identity {
     }
   }
 
-  private static waitForResponse(id?: string) {
+  /**
+   * Waits for a message from the identity service, and returns the first one that matches the supplied ID
+   * @param id The ID sent with the request (or leave empty to return the first message recieved)
+   * @returns The response data
+   */
+  public static waitForResponse(id?: string) {
     if (!WebAccount.listenerCreated) {
       window.addEventListener('message', m => WebAccount.onMessage(m))
       WebAccount.listenerCreated = true
@@ -86,34 +95,51 @@ export class WebAccount extends Identity {
     })
   }
 
-  public signTransaction (transactionHex: string) {
+  /**
+   * First, sends a request to the iframe containing the account data and unsugned transaction hex, then waits for a response.
+   * If the response contains a signed hex, it's returned. Otherwise, it opens a new window to ask the user for approval to sign the transaction.
+   * If neither method succeeds, it throws a SigningError
+   * @param transactionHex The unsigned transaction hex
+   * @param skipApproval 
+   * If true, a SigningError will be thrown immediately without opening an approval window if the initial response doesn't contain a signed transaction
+   * @returns The signed transaction hex
+   */
+  public async signTransaction (transactionHex: string, skipApproval?: boolean) {
+    const id = nanoid()
     this.postMessage({
-      id: nanoid(),
+      id,
       service: 'identity',
       method: 'sign',
-      payload: this.authData,
+      payload: {
+        ...this.authData,
+        transactionHex
+      },
     })
-    return new Promise<string>((resolve, reject) => {
-      
-    })
-  }
+    
+    const { payload } = await WebAccount.waitForResponse(id)
 
-  // TODO handle initialization?
+    if (payload.approvalRequired && !skipApproval) {
+      window.open(`https://identity.bitclout.com/approve?tx=${transactionHex}`)
+      const signedTxn = (await WebAccount.waitForResponse(null as any))?.payload?.signedTransactionHex
+      if (signedTxn) return signedTxn
+    } else if (payload.signedTransactionHex) {
+      return payload.signedTransactionHex
+    }
 
-  public static waitForMessage() {
-    return 
+    throw new SigningError(`Couldn't get transaction from identity service.`)
   }
 
   /**
-   * Open a window for the user to login to their BitClout account.
+   * Open a window for the user to login to their BitClout account ({@Link https://docs.bitclout.com/devs/identity-api#login | learn more}).
    * @param accessLevel Which access level to authorize. {@link https://docs.bitclout.com/devs/identity-api#access-levels | Learn more}.
-   * @returns An object of authenticated users' credentials
+   * @returns An object of authenticated users' credentials. You can pass the returned public key and account data to the constructor.
    */
   public static async loginUser(accessLevel: 1 | 2 | 3 | 4 = 2): Promise<LoginReturnType> {
     try {
       window.open(`https://identity.bitclout.com/log-in?accessLevelRequest=${accessLevel}`)
     } catch (e) {
       if (e instanceof ReferenceError) throw new NoWindowError()
+      else throw e
     }
 
     const data = await this.waitForResponse()
@@ -123,5 +149,13 @@ export class WebAccount extends Identity {
       publicKeyAdded: data.publicKeyAdded,
       accountAdded: data.publicKeyAdded && data.users[data.publicKeyAdded]
     } as any
+  }
+
+  /**
+   * Sign user out (opens another window).
+   * **Instance will no longer work after calling this.**
+   */
+  public logoutUser() {
+    window.open(`https://identity.bitclout.com/logout?publicKey=${this.bitcloutPublicKey}`)
   }
 }

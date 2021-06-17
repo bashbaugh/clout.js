@@ -17,7 +17,7 @@ export interface Transaction <MetaType> {
   TxnTypeJSON:    number // TODO map transaction type number to enum (and text)
 }
 
-export interface BaseTransactionSubmissionResponse <TxnMetaType> {
+export interface BaseTxnSubmissionResponse <TxnMetaType> {
   Transaction: Transaction<TxnMetaType>
   TxnHashHex: string
 }

@@ -31,7 +31,8 @@
     "elliptic": "^6.5.4",
     "hdkey": "^2.0.1",
     "nanoid": "^3.1.23",
-    "sha256": "^0.2.0"
+    "sha256": "^0.2.0",
+    "typedoc-neo-theme": "^1.1.1"
   },
   "devDependencies": {
     "@types/bs58check": "^2.1.0",

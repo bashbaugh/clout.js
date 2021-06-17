@@ -1,11 +1,17 @@
-import { Identity, SeedAccount } from './identity'
-import { URL, URLSearchParams } from 'url'
+import { Identity, ReadonlyIdentity } from './identity'
+import { URL } from 'url'
 import axiosLib, { AxiosInstance } from 'axios'
 import { NotAuthenticatedError } from './errors'
 
 export interface ClientConfig {
-  /** Which network does the mnemonic (seed phrase) belong to? */
-  network?: 'mainnet' | 'testnet'
+  /** URL of the BitClout node. This is bitclout.com by default, though it is recommended to host your own node. */
+  nodeURL: string
+
+  /** 
+   * An instance of {@link WebAccount} (for client-side users),
+   * {@link SeedAccount} (for server-side bots), or {@link ReadonlyIdentity} (for accessing any profile in readonly mode)
+   */
+  identity?: Identity | ReadonlyIdentity
 }
 
 /**
@@ -21,53 +27,28 @@ export interface ClientConfig {
  */
 export class BaseClient {
   /** 
-   * Client's identity instance, used for generating and signing transactions 
+   * Client's identity instance, used for generating and signing transactions, etc.
    */
-  public identity?: Identity
+  public identity?: Identity | ReadonlyIdentity
 
   private axios: AxiosInstance
 
-  /* API: */
-
-  // /** General endpoints */
-  // readonly node: typeof apiMethods.node
-  // /** 
-  //  * Alias to {@link Client.node} 
-  //  * @hidden 
-  //  */
-  // readonly general: typeof apiMethods.node
-  
-  // /** Transaction-related API endpoints */
-  // readonly transaction: typeof apiMethods.transaction
-  // /** 
-  //  * Alias to {@link Client.transaction} 
-  //  * @hidden 
-  //  */
-  // readonly txn: typeof apiMethods.transaction
-
-  constructor (mnemonic: string, nodeUrl: string = 'https://bitclout.com', cfg?: ClientConfig) {
+  constructor (cfg: ClientConfig) {
     try {
-      if (!nodeUrl) throw Error()
-      new URL(nodeUrl)
+      if (!cfg.nodeURL) throw Error()
+      new URL(cfg.nodeURL) // Confirm that it's valid
     } catch {
       throw Error('Please pass a valid node URL to the client constructor')
     }
 
-    this.identity = new SeedAccount(mnemonic, cfg?.network)
+    this.identity = cfg.identity
 
     this.axios = axiosLib.create({
-      baseURL: nodeUrl + '/api/v0/',
+      baseURL: cfg.nodeURL + '/api/v0/',
       headers: {
         'Content-Type': 'application/json'
       },
     })
-
-    // Bind all the API methods
-    // this.transaction = this.bindEndpointFunctions(apiMethods.transaction)
-    // this.txn = this.transaction
-
-    // this.node = this.bindEndpointFunctions(apiMethods.node)
-    // this.general = this.node
   }
 
   // /**
@@ -128,7 +109,7 @@ export class BaseClient {
    * @returns The API response
    */
   public async signAndSubmitTransaction<T extends Record<string, any>>(txn: string): Promise<T> {
-    if (!this.identity) throw new NotAuthenticatedError('transaction')
+    if (!this.identity?.canSign) throw new NotAuthenticatedError('transaction')
     return this.submitTransaction(await this.identity.signTransaction(txn))
   }
 

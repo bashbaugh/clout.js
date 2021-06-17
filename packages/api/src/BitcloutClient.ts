@@ -1,6 +1,22 @@
-import { BaseClient } from './BaseClient'
+import { BaseClient, ClientConfig } from './BaseClient'
 import { NotAuthenticatedError } from './errors'
+import { Identity, ReadonlyIdentity, SeedAccount, WebAccount } from './identity'
 import * as api from './types'
+
+function isConfigWithIdentity (obj: any): obj is Partial<ClientConfig> & {
+  identity: Identity | ReadonlyIdentity
+} {
+  return typeof obj === 'object'
+  && (obj?.identity instanceof WebAccount 
+  || obj?.identity instanceof SeedAccount
+  || obj?.identity instanceof ReadonlyIdentity)
+}
+
+function isIdentityInstance (obj: any): obj is Identity | ReadonlyIdentity {
+  return (obj?.identity instanceof WebAccount 
+  || obj?.identity instanceof SeedAccount
+  || obj?.identity instanceof ReadonlyIdentity)
+}
 
 /**
  * A BitClout node API client
@@ -14,14 +30,61 @@ import * as api from './types'
  * @beta
  */
 export class BitcloutClient extends BaseClient {
-  /**
-   * Create a client for a single account and node
-   * @param mnemonic The seed phrase of the account
-   * @param nodeUrl URL of the BitClout node. This is bitclout.com by default, though it is recommended to host your own node.
-   * @param cfg Client configuration
+  /** 
+   * Initialize a BitClout node client 
+   * @param nodeURL 
+   * URL of the BitClout node (without the final slash). This is bitclout.com by default, though it is recommended to host your own node.
+   * @param identityArg
+   * This will be the identity used by the client in requests and for signing transactions (optional).
+   * 
+   * It must be an instance of {@link WebAccount} (for sending requests on behalf of client-side users), 
+   * {@link SeedAccount} (for server-side bots **exclusively** - _NEVER ASK A USER FOR THEIR SEED PHRASE_), or 
+   * {@link ReadonlyIdentity} (which is just a read-only public key and can't sign transactions).
+   * 
+   * You can also supply a 12-word seed phrase mnemonic if you want to automatically generate a {@link SeedAccount}. 
+   * Or, pass a bitclout public key to automatically generate a {@link ReadonlyIdentity}. 
+   * 
+   * Finally, if you pass null or undefined, the client will be created without an identity, but won't be able to access many endpoints.
+   * @param otherCfg Other configuration for the client
    */
-  constructor (...args: ConstructorParameters<typeof BaseClient>) {
-    super(...args)
+  constructor (
+    nodeURL: string = 'https://bitclout.com',
+    identityArg?: WebAccount | SeedAccount | ReadonlyIdentity | string | null, 
+    otherCfg?: Partial<ClientConfig>
+  ) {
+    let identity: Identity | ReadonlyIdentity | undefined
+
+    // The identity instance has already been initialized:
+    if (isIdentityInstance(identityArg)) identity = identityArg
+    // BitClout seeds are 128 bits with 12 word mnemonics, so this must be a mnemonic:
+    else if (typeof identityArg === 'string' && (identityArg.trim().split(' ').length === 12)) {
+      try {
+        identity = new SeedAccount(identityArg)
+      } catch {
+        throw Error('Unable to generate seed account from mnemonic')
+      }
+    }
+    // Assume it's a public key:
+    else if (typeof identityArg === 'string') identity = new ReadonlyIdentity(identityArg.trim())
+    // // This must be the config object:
+    // else if (isConfigWithIdentity(identityOrConfig)) {
+    //   identity = identityOrConfig.identity
+    // }
+    // // This is a config object, but it doesn't have a valid identity:
+    // else if (!!(identityOrConfig as any)?.identity) {
+    //   throw Error('The identity instance passed is invalid. Please pass an instance of WebAccount, SeedAccount or ReadonlyIdentity.')
+    // }
+    // If the identity arg was still passed it must be invalid:
+    else if (!!identityArg) {
+      throw Error('Invalid identity argument. Must be an instance of WebAccount, SeedAccount, ReadonlyIdentity; or a seed phrase or public key or null.')
+    }
+    // Otherwise, there is no identity (which is fine).
+
+    super({
+      nodeURL,
+      identity,
+      ...(otherCfg || {})
+    })
   }
 
   /* Endpoints */

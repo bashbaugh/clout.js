@@ -3,5 +3,15 @@
   "out": "docs",
   "excludeInternal": true,
   "excludePrivate": true,
-  "excludeProtected": true
+  "excludeProtected": true,
+  "theme": "../../node_modules/typedoc-neo-theme/bin/default",
+  "plugin": "typedoc-neo-theme",
+  "source": [{
+    "path": "https://github.com/bashbaugh/clout.js/tree/main/",
+    "line": "L"
+  }],
+  // "search": [{
+  //   "name": "WebAccount",
+  //   "subtitle": "Identity"
+  // }]
 }
