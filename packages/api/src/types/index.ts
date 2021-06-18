@@ -1,5 +1,6 @@
 export * from './post'
 export * from './user'
+export * from './transaction'
 
 // Why weren't this files working as d.ts files...
 
@@ -12,6 +13,7 @@ export interface Transaction <MetaType> {
     PublicKey:    string,
     AmountNanos:  number
   }[]
+  /** Metadata about the transaction operation. **Most strings are base64 encoded**. */
   TxnMeta:        MetaType
   PublicKey:      string
   ExtraData:      any
@@ -28,6 +30,14 @@ export interface GetExchangeRateResponse {
   SatoshisPerBitCloutExchangeRate: number
   NanosSold: number
   USDCentsPerBitcoinExchangeRate: number
+}
+
+export interface GetExchangeRateResponseExtra {
+  /**
+   * How many US dollars per Bitclout?
+   * Calculated as `SatoshisPerBitCloutExchangeRate / 1e8 * USDCentsPerBitcoinExchangeRate / 100`
+   */
+  USDPerBitCloutExchangeRate: number
 }
 
 export interface GetAppStateResponse {

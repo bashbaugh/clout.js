@@ -25,8 +25,8 @@
           "source": "./docs/endpoints.md"
         },
         {
-          "title": "Errors",
-          "source": "./docs/errors.md"
+          "title": "Utilities",
+          "source": "./docs/utilities.md"
         }
       ]
     }, {

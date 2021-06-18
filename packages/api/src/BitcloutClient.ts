@@ -1,3 +1,4 @@
+import { satoshisToBitcoin } from '.'
 import { BaseClient, ClientConfig } from './BaseClient'
 import { InvalidConfigError, NotAuthenticatedError } from './errors'
 import { Identity, ReadonlyIdentity, SeedAccount, WebAccount } from './identity'
@@ -21,6 +22,8 @@ function isIdentityInstance (obj: any): obj is Identity | ReadonlyIdentity {
   && ((obj.canSign === true && (obj as object).hasOwnProperty('signTransaction')) || (obj.canSign === false))
   && typeof obj.bitcloutPublicKey === 'string'
 }
+
+// TODO @signatureRequired decorator instead of checking each endpoint
 
 /**
  * A BitClout node API client
@@ -106,15 +109,51 @@ export class BitcloutClient extends BaseClient {
     }
   }
 
-  /** Gets the current exchange rate */
-  public async getExchangeRate() {
+  /** 
+   * Gets the current exchange rate 
+   * @beta
+  */
+  public async getExchangeRate(): Promise<api.GetExchangeRateResponse & api.GetExchangeRateResponseExtra> {
     const res = await this.callApi<api.GetExchangeRateResponse>('get-exchange-rate', {}, 'GET')
-    return res
-  } 
+    // TODO fix. Why is this showing a different rate than on the site? Maybe the site is showing a value from the exchange.
+    const usdER = satoshisToBitcoin(res.SatoshisPerBitCloutExchangeRate) * res.USDCentsPerBitcoinExchangeRate / 100
+    return {
+      ...res,
+      USDPerBitCloutExchangeRate: usdER
+    }
+  }
 
   /** Get state of BitClout, such as cost of profile creation and diamond tiers*/
   public getAppState() {
     return this.callApi<api.GetAppStateResponse>('get-app-state', {})
+  }
+
+  /** 
+   * Check if a transaction is currently in the mempool 
+   * @param TxnHashHex This is the transaction **hash** hex, not the full transaction hex.
+   */
+  public async checkTransaction(TxnHashHex: string) {
+    return this.callApi<api.GetTransactionResponse>('get-txn', {
+      TxnHashHex
+    })
+  }
+
+  // TODO images and stuff
+  /** 
+   * Update profile 
+   * @param updateFields Object of fields to update
+   */
+  public async updateProfile(updateFields: api.UpdateProfileInput) {
+    if (!this.identity) throw new NotAuthenticatedError('updateProfile')
+    return this.callApi<api.UpdateProfileTxnResponse>('update-profile', {
+      UpdaterPublicKeyBase58Check: this.identity.bitcloutPublicKey,
+      NewUsername: updateFields.newUsername,
+      NewDescription: updateFields.newDescription,
+      NewCreatorBasisPoints: updateFields.newFoundersReward * 1e4,
+      NewStakeMultipleBasisPoints: updateFields.newStakeMultipleBasisPoints * 1e4,
+      IsHidden: updateFields.isHidden,
+      MinFeeRateNanosPerKB: 1000
+    })
   }
 
   /** Submit a post */
@@ -123,7 +162,7 @@ export class BitcloutClient extends BaseClient {
     body: string
   ) {
     if (!this.identity) throw new NotAuthenticatedError('submitPost')
-    return this.handleTransactionRequest<api.PostSubmissionResponse>('submit-post', {
+    return this.handleTransactionRequest<api.PostTxnResponse>('submit-post', {
       UpdaterPublicKeyBase58Check: this.identity.bitcloutPublicKey,
       BodyObj: {
         Body: body

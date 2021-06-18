@@ -1,4 +1,4 @@
-import { PostEntryResponse } from './index' 
+import { BaseTxnSubmissionResponse, PostEntryResponse } from './index' 
 
 /** Represents a creator coin */
 export interface CoinEntry {
@@ -47,3 +47,29 @@ export interface ProfileEntryResponseFull {
 	// UsersThatHODL: []*BalanceEntryResponse // TODO
 	UsersThatHODL:				any
 }
+
+export interface UpdateProfileInput {
+	newUsername?:				string
+	newDescription?:			string
+	// TODO handle uploading PFP
+	// NewProfilePic:			string
+	/**
+	 * A new founders reward percentage, as a number between 0 and 1.
+	 * (will be converted to NewCreatorBasisPoints internally)
+	 */
+	newFoundersReward:	number
+	newStakeMultipleBasisPoints:	number // TODO ya
+	isHidden?:						boolean
+}
+
+export interface TxnMetaUpdateProfile {
+	ProfilePublicKey:		string
+	NewUsername:				string
+	NewDescription:			string
+	NewProfilePic:			string
+	NewCreatorBasisPoints:				number
+	NewStakeMultipleBasisPoints:	number
+	IsHidden:						boolean
+}
+
+export type UpdateProfileTxnResponse = BaseTxnSubmissionResponse<TxnMetaUpdateProfile>

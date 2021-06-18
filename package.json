@@ -12,7 +12,7 @@
   "scripts": {
     "docs": "rm -rf docs-out && typedoc --options typedoc.json",
     "docs-dev": "rm -rf docs-out && typedoc --options typedoc.json --watch",
-    "test": "lerna run test",
+    "test": "yarn --cwd ./packages/api test",
     "format": "prettier --write \"packages/**/*.ts\"",
     "lint": "tslint -p tsconfig.json"
   },

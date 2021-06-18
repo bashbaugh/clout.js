@@ -5,7 +5,7 @@
   "out": "docs-out",
   "includeVersion": true,
   "name": "Clout.JS",
-  "readme": "./README.md",
+  "readme": "./docs/readme.md",
   "excludeInternal": true,
   "excludePrivate": true,
   "excludeProtected": true,

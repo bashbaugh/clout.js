@@ -53,7 +53,7 @@ interface PostEntryResponseFull {
 
 export type PostEntryResponse = Partial<PostEntryResponseFull>
 
-export interface TxnMetadataSubmitPost {
+export interface TxnMetaSubmitPost {
   PostHashToModify: string
   ParentStakeId: string
   Body: string
@@ -63,6 +63,6 @@ export interface TxnMetadataSubmitPost {
   IsHidden: boolean
 }
 
-export type PostSubmissionResponse = BaseTxnSubmissionResponse<TxnMetadataSubmitPost> & {
+export type PostTxnResponse = BaseTxnSubmissionResponse<TxnMetaSubmitPost> & {
   PostEntryResponse:  PostEntryResponse
 }
