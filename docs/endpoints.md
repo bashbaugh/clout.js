@@ -48,7 +48,7 @@ Only some endpoints have been implemented so far. Endpoints that have not yet be
 ### Media
 
 - {@link BitcloutClient.uploadImage}
-- {@link BitcloutClient.getFullTiktokUrl}
+- {@link BitcloutClient.getFullTikTokUrl}
 
 ### Messages
 

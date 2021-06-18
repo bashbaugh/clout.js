@@ -4,24 +4,24 @@ export * from './transaction'
 
 // Why weren't this files working as d.ts files...
 
-export interface Transaction <MetaType> {
+export interface Transaction<MetaType> {
   TxInputs: {
-    TxID:         number[],
-    Index:        number
+    TxID: number[]
+    Index: number
   }[]
   TxOutputs: {
-    PublicKey:    string,
-    AmountNanos:  number
+    PublicKey: string
+    AmountNanos: number
   }[]
   /** Metadata about the transaction operation. **Most strings are base64 encoded**. */
-  TxnMeta:        MetaType
-  PublicKey:      string
-  ExtraData:      any
-  Signature:      any // TODO I'm not sure what type this is. It seems to have an S and R number?
-  TxnTypeJSON:    number // TODO map transaction type number to enum (and text)
+  TxnMeta: MetaType
+  PublicKey: string
+  ExtraData: any
+  Signature: any // TODO I'm not sure what type this is. It seems to have an S and R number?
+  TxnTypeJSON: number // TODO map transaction type number to enum (and text)
 }
 
-export interface BaseTxnSubmissionResponse <TxnMetaType> {
+export interface BaseTxnSubmissionResponse<TxnMetaType> {
   Transaction: Transaction<TxnMetaType>
   TxnHashHex: string
 }
@@ -41,20 +41,29 @@ export interface GetExchangeRateResponseExtra {
 }
 
 export interface GetAppStateResponse {
-  AmplitudeKey:                       string
-	AmplitudeDomain:                    string
-	MinSatoshisBurnedForProfileCreation:number
+  AmplitudeKey: string
+  AmplitudeDomain: string
+  MinSatoshisBurnedForProfileCreation: number
   /** Is this node on the testnet? */
-	IsTestnet:                          boolean
+  IsTestnet: boolean
   /** The support email associated with this node */
-	SupportEmail:                       string
-	ShowProcessingSpinners:             boolean
-	HasStarterBitCloutSeed:             boolean
-	HasTwilioAPIKey:                    boolean
+  SupportEmail: string
+  ShowProcessingSpinners: boolean
+  HasStarterBitCloutSeed: boolean
+  HasTwilioAPIKey: boolean
   /** Fee to create a BitClout profile */
-	CreateProfileFeeNanos:              number
-	CompProfileCreation:                boolean
+  CreateProfileFeeNanos: number
+  CompProfileCreation: boolean
   /** Map of diamond tiers to values */
-	DiamondLevelMap:                    Record<number, number>
-	HasWyreIntegration:                 boolean
+  DiamondLevelMap: Record<number, number>
+  HasWyreIntegration: boolean
+}
+
+export interface UploadImageResponse {
+  /** The URL of the uploaded image on the node. */
+  ImageURL: string
+}
+
+export interface GetFullTikTokURLResponse {
+  FullTikTokURL: string
 }

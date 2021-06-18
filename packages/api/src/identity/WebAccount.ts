@@ -13,15 +13,16 @@ export interface BitcloutAuthData {
 
 export interface LoginReturnType {
   /** An object mapping public keys to account credentials. */
-  accounts: Record<string, BitcloutAuthData>,
+  accounts: Record<string, BitcloutAuthData>
   /** If a new account got signed in, it will be here */
-  publicKeyAdded: string,
+  publicKeyAdded: string
   accontAdded?: BitcloutAuthData
 }
 
+// TODO close opened windows
 // TODO additional instructions about iframe, etc.
 /**
- * Can be used client-side to interact with the BitClout identity service. This is 
+ * Can be used client-side to interact with the BitClout identity service. This is
  */
 export class WebAccount extends Identity {
   private authData: BitcloutAuthData
@@ -31,7 +32,7 @@ export class WebAccount extends Identity {
   private static listenerCreated: boolean
   /** A list of callback functions waiting for a response from the identity service */
   private static waitingQueue: {
-    id?: string,
+    id?: string
     callback: (data: any) => void
   }[] = []
 
@@ -42,7 +43,11 @@ export class WebAccount extends Identity {
    * @param authData The identity service payload object for the user
    * @param iframe The iframe element of the embedded identity service
    */
-  constructor (bitcloutPublicKey: string, authData: BitcloutAuthData, iframe: HTMLIFrameElement) {
+  constructor(
+    bitcloutPublicKey: string,
+    authData: BitcloutAuthData,
+    iframe: HTMLIFrameElement
+  ) {
     if (!window) {
       throw new NoWindowError()
     }
@@ -64,14 +69,20 @@ export class WebAccount extends Identity {
   private static onMessage(m: MessageEvent) {
     if (m.origin.startsWith('https://identity.bitclout.com')) {
       if (m.data.method === 'initialize') {
-        (m.source as WindowProxy).postMessage({
-          id: m.data.id,
-          service: 'identity'
-        }, '*')
+        // prettier-ignore
+        (m.source as WindowProxy).postMessage(
+          {
+            id: m.data.id,
+            service: 'identity',
+          },
+          '*'
+        )
       }
 
       // Find a function in the queue that's waiting for this message
-      const waitingCb = this.waitingQueue.find(w => (!w.id && !m.data.id) || w.id === m.data.id)?.callback
+      const waitingCb = this.waitingQueue.find(
+        (w) => (!w.id && !m.data.id) || w.id === m.data.id
+      )?.callback
       if (waitingCb) waitingCb(m.data)
     }
   }
@@ -83,29 +94,29 @@ export class WebAccount extends Identity {
    */
   public static waitForResponse(id?: string) {
     if (!WebAccount.listenerCreated) {
-      window.addEventListener('message', m => WebAccount.onMessage(m))
+      window.addEventListener('message', (m) => WebAccount.onMessage(m))
       WebAccount.listenerCreated = true
     }
 
     // Add the resolve function the queue of waiting functions, so it will be called when the response is received.
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<any>((resolve) => {
       WebAccount.waitingQueue.push({
         id,
-        callback: (data) => resolve(data)
+        callback: (data) => resolve(data),
       })
     })
   }
 
   /**
-   * First, sends a request to the iframe containing the account data and unsugned transaction hex, then waits for a response.
+   * First, sends a request to the embedded iframe containing the account data and unsugned transaction hex, then waits for a response.
    * If the response contains a signed hex, it's returned. Otherwise, it opens a new window to ask the user for approval to sign the transaction.
    * If neither method succeeds, it throws a SigningError
    * @param transactionHex The unsigned transaction hex
-   * @param skipApproval 
+   * @param skipApproval
    * If true, a SigningError will be thrown immediately without opening an approval window if the initial response doesn't contain a signed transaction
    * @returns The signed transaction hex
    */
-  public async signTransaction (transactionHex: string, skipApproval?: boolean) {
+  public async signTransaction(transactionHex: string, skipApproval?: boolean) {
     const id = nanoid()
     this.postMessage({
       id,
@@ -113,15 +124,16 @@ export class WebAccount extends Identity {
       method: 'sign',
       payload: {
         ...this.authData,
-        transactionHex
+        transactionHex,
       },
     })
-    
+
     const { payload } = await WebAccount.waitForResponse(id)
 
     if (payload.approvalRequired && !skipApproval) {
       window.open(`https://identity.bitclout.com/approve?tx=${transactionHex}`)
-      const signedTxn = (await WebAccount.waitForResponse(null as any))?.payload?.signedTransactionHex
+      const signedTxn = (await WebAccount.waitForResponse(null as any))?.payload
+        ?.signedTransactionHex
       if (signedTxn) return signedTxn
     } else if (payload.signedTransactionHex) {
       return payload.signedTransactionHex
@@ -131,13 +143,41 @@ export class WebAccount extends Identity {
   }
 
   /**
+   * Sends a request to the embedded identity service for a signed JWT. Throws a SigningError if the response doesn't contain a JWT.
+   * @returns A JWT signed with the user's private key, which can be used to authenticate them to the backend.
+   */
+  public async signJWT() {
+    if (this.authData.accessLevel < 2) {
+      throw new Error('Need at least access level 2 to sign JWTs')
+    }
+
+    const id = nanoid()
+    this.postMessage({
+      id,
+      service: 'identity',
+      method: 'jwt',
+      payload: this.authData,
+    })
+
+    const { payload } = await WebAccount.waitForResponse(id)
+
+    if (payload.jwt) return payload.jwt
+
+    throw new SigningError(`Couldn't get signed JWT from identity service.`)
+  }
+
+  /**
    * Open a window for the user to login to their BitClout account ({@Link https://docs.bitclout.com/devs/identity-api#login | learn more}).
    * @param accessLevel Which access level to authorize. {@link https://docs.bitclout.com/devs/identity-api#access-levels | Learn more}.
    * @returns An object of authenticated users' credentials. You can pass the returned public key and account data to the constructor.
    */
-  public static async loginUser(accessLevel: 1 | 2 | 3 | 4 = 2): Promise<LoginReturnType> {
+  public static async loginUser(
+    accessLevel: 0 | 2 | 3 | 4 = 2
+  ): Promise<LoginReturnType> {
     try {
-      window.open(`https://identity.bitclout.com/log-in?accessLevelRequest=${accessLevel}`)
+      window.open(
+        `https://identity.bitclout.com/log-in?accessLevelRequest=${accessLevel}`
+      )
     } catch (e) {
       if (e instanceof ReferenceError) throw new NoWindowError()
       else throw e
@@ -148,7 +188,7 @@ export class WebAccount extends Identity {
     return {
       accounts: data.users,
       publicKeyAdded: data.publicKeyAdded,
-      accountAdded: data.publicKeyAdded && data.users[data.publicKeyAdded]
+      accountAdded: data.publicKeyAdded && data.users[data.publicKeyAdded],
     } as any
   }
 
@@ -157,6 +197,8 @@ export class WebAccount extends Identity {
    * **Instance will no longer work after calling this.**
    */
   public logoutUser() {
-    window.open(`https://identity.bitclout.com/logout?publicKey=${this.bitcloutPublicKey}`)
+    window.open(
+      `https://identity.bitclout.com/logout?publicKey=${this.bitcloutPublicKey}`
+    )
   }
 }

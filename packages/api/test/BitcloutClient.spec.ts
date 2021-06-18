@@ -3,8 +3,10 @@ import { BitcloutClient, ReadonlyIdentity, SeedAccount } from '../src'
 
 // This is a real account.
 // Feel free to send bitclout to it I'm sure no one will steal it.
-const testAccountSeed = 'outside seven reunion sniff mimic skull pulp twist twice elegant replace luggage'
-const testAccountPublickey = 'BC1YLhv73xX4vYcXGiCoinNMEfYE6zwX4BGn54vtdFr9RprYcAvpiB2'
+const testAccountSeed =
+  'outside seven reunion sniff mimic skull pulp twist twice elegant replace luggage'
+const testAccountPublickey =
+  'BC1YLhv73xX4vYcXGiCoinNMEfYE6zwX4BGn54vtdFr9RprYcAvpiB2'
 
 describe('BitcloutClient', () => {
   describe('constructor', () => {

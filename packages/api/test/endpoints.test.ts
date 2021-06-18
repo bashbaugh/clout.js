@@ -1,11 +1,15 @@
+import { resolve } from 'path'
+require('dotenv').config({ path: resolve(__dirname, '../.env') })
 import { expect } from 'chai'
 import { BitcloutClient, ReadonlyIdentity, SeedAccount } from '../src'
 
 // TODO figure out how to generate a schema by reflecting return types and validate responses against actual types
 
 const anonClient = new BitcloutClient()
+// const readonlyClient = new BitcloutClient()
 
-const fakeHashHexh = '9fcd2c948c04ea689b76f22db52dcc7161415be15da1d4759c8ee8ee5352ae16'
+const fakeHashHexh =
+  '9fcd2c948c04ea689b76f22db52dcc7161415be15da1d4759c8ee8ee5352ae16'
 
 describe('General endpoints:', () => {
   describe('healthCheck', () => {
@@ -18,7 +22,10 @@ describe('General endpoints:', () => {
   describe('getExhangeRate', () => {
     it('is ok', async () => {
       const res = await anonClient.getExchangeRate()
-      const usdExchangeRate = 1 * res.SatoshisPerBitCloutExchangeRate / 1e8 * res.USDCentsPerBitcoinExchangeRate / 100
+      const usdExchangeRate =
+        (((1 * res.SatoshisPerBitCloutExchangeRate) / 1e8) *
+          res.USDCentsPerBitcoinExchangeRate) /
+        100
       expect(res.USDPerBitCloutExchangeRate).to.equal(usdExchangeRate)
       expect(res.NanosSold).to.be.a('number')
     })
@@ -38,6 +45,16 @@ describe('Transaction endpoints:', () => {
     it('is ok', async () => {
       const { TxnFound } = await anonClient.checkTransaction(fakeHashHexh)
       expect(TxnFound).false
+      // TODO check valid transaction
+    })
+  })
+})
+
+describe('Media endpoints:', () => {
+  describe('uploadImage', () => {
+    it('is ok', async () => {
+      // const { TxnFound } = await anonClient.checkTransaction(fakeHashHexh)
+      // expect(TxnFound).false
       // TODO check valid transaction
     })
   })

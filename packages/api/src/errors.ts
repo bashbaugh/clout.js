@@ -1,10 +1,11 @@
-
 /**
  * @ignore
  */
 export class NoWindowError extends Error {
   constructor() {
-    super(`Couldn't access global window object. Make sure you're only using WebAccount in a browser environment.`)
+    super(
+      `Couldn't access global window object. Make sure you're only using WebAccount in a browser environment.`
+    )
     this.name = 'NoWindowError'
   }
 }
@@ -14,7 +15,9 @@ export class NoWindowError extends Error {
  */
 export class NotAuthenticatedError extends Error {
   constructor(endpointCalled: string) {
-    super(`${endpointCalled} requires a signature. Please add a SeedAccount or WebAccount to the client.`)
+    super(
+      `${endpointCalled} requires a signature. Please add a SeedAccount or WebAccount to the client.`
+    )
     this.name = 'NotAuthenticatedError'
   }
 }
@@ -22,7 +25,7 @@ export class NotAuthenticatedError extends Error {
 /**
  * @ignore
  */
- export class SigningError extends Error {
+export class SigningError extends Error {
   constructor(msg?: string) {
     super(`Unable to sign transaction hex: ${msg}`)
     this.name = 'SigningError'
@@ -32,7 +35,7 @@ export class NotAuthenticatedError extends Error {
 /**
  * @ignore
  */
- export class InvalidConfigError extends Error {
+export class InvalidConfigError extends Error {
   constructor(msg?: string) {
     super(`${msg}`)
     this.name = 'InvalidConfigError'

@@ -3,6 +3,8 @@ import * as bip39 from 'bip39'
 import { ec as EC } from 'elliptic'
 import sha256 from 'sha256'
 import bs58check from 'bs58check'
+import KeyEncoder from 'key-encoder'
+import * as jsonwebtoken from 'jsonwebtoken'
 
 // TODO make async???
 // TODO signing system may change at any time; need to keep an eye on official repo for changes
@@ -11,35 +13,41 @@ import bs58check from 'bs58check'
 // https://github.com/bitclout/identity/blob/main/src/app/crypto.service.ts#L22
 const BCLT_PUBLIC_KEY_PREFIXES = {
   mainnet: [0xcd, 0x14, 0x0],
-  testnet: [0x11, 0xc2, 0x0]
+  testnet: [0x11, 0xc2, 0x0],
 }
+
+const CURVE_TYPE = 'secp256k1'
 
 export function getKeychainFromMnemonic(mnemonic: string): HDKey {
   const seed = bip39.mnemonicToSeedSync(mnemonic)
-  return HDKey.fromMasterSeed(seed).derive('m/44\'/0\'/0\'/0/0')
+  return HDKey.fromMasterSeed(seed).derive("m/44'/0'/0'/0/0")
 }
 
 export function getEcKeypairFromPrivateSeedKey(seed: Buffer | string) {
-  const ec = new EC('secp256k1')
+  const ec = new EC(CURVE_TYPE)
   return ec.keyFromPrivate(seed)
 }
 
-export const getKeypairFromMnemonic = (mnemonic: string) => 
+export const getKeypairFromMnemonic = (mnemonic: string) =>
   getEcKeypairFromPrivateSeedKey(getKeychainFromMnemonic(mnemonic).privateKey)
 
 // https://github.com/bitclout/identity/blob/main/src/lib/bindata/util.ts
-function uvarint64ToBuf (uint: number): Buffer {
+/* tslint:disable:no-bitwise */
+function uvarint64ToBuf(uint: number): Buffer {
   const result = []
   while (uint >= 0x80) {
-    // @ts-ignore
-    result.push((uint & 0xFF) | 0x80); uint >>>= 7;
+    result.push((uint & 0xff) | 0x80)
+    uint >>>= 7
   }
-  // @ts-ignore
   result.push(uint | 0)
   return Buffer.from(result)
 }
+/* tslint:enable:no-bitwise */
 
-export function getBitcloutPublicKeyFromKeypair(keypair: EC.KeyPair, net: 'mainnet' | 'testnet'): string {
+export function getBitcloutPublicKeyFromKeypair(
+  keypair: EC.KeyPair,
+  net: 'mainnet' | 'testnet'
+): string {
   const prefix = BCLT_PUBLIC_KEY_PREFIXES[net]
   const key = keypair.getPublic().encode('array', true)
   const prefixAndKey = Uint8Array.from(prefix.concat(key))
@@ -63,4 +71,14 @@ export function signTransactionHex(txn: string, keypair: EC.KeyPair) {
   ])
 
   return signedTransactionBytes.toString('hex')
+}
+
+// https://github.com/bitclout/identity/blob/main/src/app/signing.service.ts#L18
+export function signJWT(seedHex: string, data: any = {}) {
+  const encoder = new KeyEncoder(CURVE_TYPE)
+  const encodedPrivateKey = encoder.encodePrivate(seedHex, 'raw', 'pem')
+  return jsonwebtoken.sign(data, encodedPrivateKey, {
+    algorithm: 'ES256',
+    expiresIn: 60, // Expires in 60 seconds
+  })
 }

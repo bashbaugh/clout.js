@@ -3,10 +3,13 @@ import { SeedAccount } from '../src'
 
 // This is a real account (on mainnet)
 // Feel free to send bitclout to it I'm sure no one will steal it.
-const testAccountSeed = 'outside seven reunion sniff mimic skull pulp twist twice elegant replace luggage'
-const testAccountPublickey = 'BC1YLhv73xX4vYcXGiCoinNMEfYE6zwX4BGn54vtdFr9RprYcAvpiB2'
+const testAccountSeed =
+  'outside seven reunion sniff mimic skull pulp twist twice elegant replace luggage'
+const testAccountPublickey =
+  'BC1YLhv73xX4vYcXGiCoinNMEfYE6zwX4BGn54vtdFr9RprYcAvpiB2'
 
-const testAccountPublicKeyTestnet = 'tBCKX3M58o2LeXT1cn8Apxb34rFVKTHzG1qznbpNGDxUmmW3F2iise'
+const testAccountPublicKeyTestnet =
+  'tBCKX3M58o2LeXT1cn8Apxb34rFVKTHzG1qznbpNGDxUmmW3F2iise'
 
 describe('SeedAccount', () => {
   describe('constructor', () => {

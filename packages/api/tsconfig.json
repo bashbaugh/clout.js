@@ -3,6 +3,6 @@
   "include": ["src/"],
   "compilerOptions": {
     "outDir": "./dist",
-    "lib": ["DOM"]
+    "lib": ["DOM", "esnext"]
   }
 }

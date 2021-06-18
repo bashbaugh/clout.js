@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "API client",
   "author": "Benjamin Ashbaugh <hi@benjaminashbaugh.me>",
-  "homepage": "https://github.com/bashbaugh/clout.js#readme",
+  "homepage": "https://cloutjs.bweb.app",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,7 +19,7 @@
   },
   "scripts": {
     "test": "mocha test ./test/**/*.ts --recursive -r ts-node/register --reporter nyan",
-    "build": "rollup --config rollup.config.js"
+    "build": "rm -rf dist && rollup --config rollup.config.js"
   },
   "bugs": {
     "url": "https://github.com/bashbaugh/clout.js/issues"
@@ -28,8 +28,11 @@
     "axios": "^0.21.1",
     "bip39": "^3.0.4",
     "bs58check": "^2.1.2",
+    "dotenv": "^10.0.0",
     "elliptic": "^6.5.4",
     "hdkey": "^2.0.1",
+    "jsonwebtoken": "^8.5.1",
+    "key-encoder": "^2.0.3",
     "nanoid": "^3.1.23",
     "sha256": "^0.2.0"
   },
@@ -37,6 +40,7 @@
     "@types/bs58check": "^2.1.0",
     "@types/elliptic": "^6.4.12",
     "@types/hdkey": "^2.0.0",
+    "@types/jsonwebtoken": "^8.5.2",
     "@types/sha256": "^0.2.0"
   }
 }

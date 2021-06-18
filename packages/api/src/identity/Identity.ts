@@ -1,4 +1,3 @@
-
 interface IIndentity {
   readonly bitcloutPublicKey: string
   readonly canSign: boolean
@@ -14,16 +13,21 @@ export abstract class Identity implements IIndentity {
 
   public readonly canSign = true
 
-  constructor (publicKey: string) {
+  constructor(publicKey: string) {
     if (this.constructor === Identity) {
-      throw Error('Cannot directly instantiate an abstract Identity class. Use a WebAccount or SeedAccount instead.')
+      throw Error(
+        'Cannot directly instantiate an abstract Identity class. Use a WebAccount or SeedAccount instead.'
+      )
     }
 
     this.bitcloutPublicKey = publicKey
   }
 
   /** Must take an unsigned transaction hex and return a signed hex that can be submitted to BitClout. */
-  abstract signTransaction (transactionHex: string): Promise<string>
+  abstract signTransaction(transactionHex: string): Promise<string>
+
+  /** Must sign and return an empty JWT using the account's private key */
+  abstract signJWT(): Promise<string>
 }
 
 /**
@@ -40,7 +44,7 @@ export class ReadonlyIdentity implements IIndentity {
    * Creates a readonly identity
    * @param publicKey A BitClout public key to associate with this identity.
    */
-  constructor (publicKey: string) {
+  constructor(publicKey: string) {
     this.bitcloutPublicKey = publicKey
   }
 }
