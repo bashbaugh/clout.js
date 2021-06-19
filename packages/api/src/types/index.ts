@@ -17,7 +17,11 @@ export interface Transaction<MetaType> {
   TxnMeta: MetaType
   PublicKey: string
   ExtraData: any
-  Signature: any // TODO I'm not sure what type this is. It seems to have an S and R number?
+  /** Transaction's ECDSA signature */
+  Signature: {
+    R: number,
+    S: number
+  }
   TxnTypeJSON: number // TODO map transaction type number to enum (and text)
 }
 

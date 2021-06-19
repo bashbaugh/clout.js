@@ -5,6 +5,7 @@ import sha256 from 'sha256'
 import bs58check from 'bs58check'
 import KeyEncoder from 'key-encoder'
 import * as jsonwebtoken from 'jsonwebtoken'
+import { JWTValidationError } from '../errors'
 
 // TODO make async???
 // TODO signing system may change at any time; need to keep an eye on official repo for changes
@@ -16,7 +17,8 @@ const BCLT_PUBLIC_KEY_PREFIXES = {
   testnet: [0x11, 0xc2, 0x0],
 }
 
-const CURVE_TYPE = 'secp256k1'
+const ec = new EC('secp256k1')
+const encoder = new KeyEncoder('secp256k1')
 
 export function getKeychainFromMnemonic(mnemonic: string): HDKey {
   const seed = bip39.mnemonicToSeedSync(mnemonic)
@@ -24,7 +26,6 @@ export function getKeychainFromMnemonic(mnemonic: string): HDKey {
 }
 
 export function getEcKeypairFromPrivateSeedKey(seed: Buffer | string) {
-  const ec = new EC(CURVE_TYPE)
   return ec.keyFromPrivate(seed)
 }
 
@@ -43,7 +44,7 @@ function uvarint64ToBuf(uint: number): Buffer {
   return Buffer.from(result)
 }
 /* tslint:enable:no-bitwise */
-
+ 
 export function getBitcloutPublicKeyFromKeypair(
   keypair: EC.KeyPair,
   net: 'mainnet' | 'testnet'
@@ -52,6 +53,13 @@ export function getBitcloutPublicKeyFromKeypair(
   const key = keypair.getPublic().encode('array', true)
   const prefixAndKey = Uint8Array.from(prefix.concat(key))
   return bs58check.encode(prefixAndKey)
+}
+
+export function decodeBitcloutPublicKey(bcltPublicKey: string) {
+  const buff = bs58check.decode(bcltPublicKey)
+  // Strip first three bytes to get rid of network prefix
+  const keyBytes = buff.slice(3)
+  return ec.keyFromPublic(keyBytes)
 }
 
 export function signTransactionHex(txn: string, keypair: EC.KeyPair) {
@@ -75,10 +83,32 @@ export function signTransactionHex(txn: string, keypair: EC.KeyPair) {
 
 // https://github.com/bitclout/identity/blob/main/src/app/signing.service.ts#L18
 export function signJWT(seedHex: string, data: any = {}) {
-  const encoder = new KeyEncoder(CURVE_TYPE)
   const encodedPrivateKey = encoder.encodePrivate(seedHex, 'raw', 'pem')
   return jsonwebtoken.sign(data, encodedPrivateKey, {
     algorithm: 'ES256',
     expiresIn: 60, // Expires in 60 seconds
   })
+}
+
+/**
+ * Parses a JWT and verifies that it was signed by owner of a public key. Throws an error if there is an error decoding
+ * @param jwt The JWT string
+ * @param publicKey A BitClout public to validate the JWT against
+ * @returns The JWT payload, if verification was succesful.
+ */
+export function validateJWT(jwt: string, publicKey: string): jsonwebtoken.JwtPayload {
+  let pubKey: string
+  try {
+    pubKey = encoder.encodePublic(decodeBitcloutPublicKey(publicKey).getPublic('hex'), 'raw', 'pem')
+  } catch (e) {
+    throw new JWTValidationError(`Invalid public key ${publicKey}`)
+  }
+
+  try {
+    return jsonwebtoken.verify(jwt, pubKey, {
+      algorithms: ['ES256']
+    }) as any
+  } catch (e) {
+    throw new JWTValidationError('Unable to decode or verify JWT')
+  }
 }

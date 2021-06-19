@@ -7,6 +7,7 @@ export {
   ReadonlyIdentity,
   BitcloutAuthData,
   LoginReturnType,
+  validateJWT
 } from './identity'
 export * from './errors'
 export * from './types'

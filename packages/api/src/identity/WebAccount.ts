@@ -19,7 +19,6 @@ export interface LoginReturnType {
   accontAdded?: BitcloutAuthData
 }
 
-// TODO close opened windows
 // TODO additional instructions about iframe, etc.
 /**
  * Can be used client-side to interact with the BitClout identity service. This is
@@ -131,9 +130,10 @@ export class WebAccount extends Identity {
     const { payload } = await WebAccount.waitForResponse(id)
 
     if (payload.approvalRequired && !skipApproval) {
-      window.open(`https://identity.bitclout.com/approve?tx=${transactionHex}`)
+      const w = window.open(`https://identity.bitclout.com/approve?tx=${transactionHex}`)
       const signedTxn = (await WebAccount.waitForResponse(null as any))?.payload
         ?.signedTransactionHex
+      w?.close()
       if (signedTxn) return signedTxn
     } else if (payload.signedTransactionHex) {
       return payload.signedTransactionHex
@@ -174,16 +174,16 @@ export class WebAccount extends Identity {
   public static async loginUser(
     accessLevel: 0 | 2 | 3 | 4 = 2
   ): Promise<LoginReturnType> {
-    try {
-      window.open(
-        `https://identity.bitclout.com/log-in?accessLevelRequest=${accessLevel}`
-      )
-    } catch (e) {
-      if (e instanceof ReferenceError) throw new NoWindowError()
-      else throw e
+    if (!window) {
+      throw new NoWindowError()
     }
+    const w = window.open(
+      `https://identity.bitclout.com/log-in?accessLevelRequest=${accessLevel}`
+    )
 
     const data = await this.waitForResponse()
+
+    w?.close()
 
     return {
       accounts: data.users,

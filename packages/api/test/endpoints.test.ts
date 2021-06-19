@@ -11,6 +11,9 @@ const anonClient = new BitcloutClient()
 const fakeHashHexh =
   '9fcd2c948c04ea689b76f22db52dcc7161415be15da1d4759c8ee8ee5352ae16'
 
+// TODO figure out how to test endpoints which need signature
+// TODO write endpoint tests
+
 describe('General endpoints:', () => {
   describe('healthCheck', () => {
     it('is ok', async () => {

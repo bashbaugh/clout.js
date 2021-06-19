@@ -41,3 +41,13 @@ export class InvalidConfigError extends Error {
     this.name = 'InvalidConfigError'
   }
 }
+
+/**
+ * @ignore
+ */
+ export class JWTValidationError extends Error {
+  constructor(msg?: string) {
+    super(`${msg}`)
+    this.name = 'JWTValidationError'
+  }
+}
