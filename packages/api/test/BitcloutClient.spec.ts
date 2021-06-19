@@ -20,5 +20,12 @@ describe('BitcloutClient', () => {
       expect(client.identity).to.be.instanceOf(SeedAccount)
       expect(client.identity?.bitcloutPublicKey).to.equal(testAccountPublickey)
     })
+
+    it('should throw a NotAuthenticatedError', () => {
+      const client = new BitcloutClient()
+      expect(() => client.submitPost('hi')).to.throw(
+        'submitPost requires a signature. Please add a SeedAccount or WebAccount to the client.'
+      )
+    })
   })
 })

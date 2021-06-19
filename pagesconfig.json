@@ -12,7 +12,7 @@
         },
         {
           "title": "Identity & Authentication",
-          "source": "./docs/identity-types.md",
+          "source": "./docs/identity.md",
           "children": [
 						{
 							"title": "Using WebAccount",

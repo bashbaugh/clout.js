@@ -11,6 +11,8 @@ export interface BitcloutAuthData {
   network: string
 }
 
+// TODO test this
+
 export interface LoginReturnType {
   /** An object mapping public keys to account credentials. */
   accounts: Record<string, BitcloutAuthData>

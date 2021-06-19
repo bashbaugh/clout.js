@@ -1,42 +1,10 @@
-import { sign } from 'jsonwebtoken'
 import { satoshisToBitcoin } from '.'
 import { BaseClient, ClientConfig } from './BaseClient'
 import { InvalidConfigError, NotAuthenticatedError } from './errors'
 import { Identity, ReadonlyIdentity, SeedAccount, WebAccount } from './identity'
 import * as api from './types'
-
-// Make sure this class is a valid Identity or ReadonlyIdentity
-function isIdentityInstance(obj: any): obj is Identity | ReadonlyIdentity {
-  // return (obj?.identity instanceof WebAccount
-  // || obj?.identity instanceof SeedAccount
-  // || obj?.identity instanceof ReadonlyIdentity)
-  return (
-    typeof obj === 'object' &&
-    ((obj.canSign === true &&
-      Object.prototype.hasOwnProperty.call(obj, 'signTransaction')) ||
-      obj.canSign === false) &&
-    typeof obj.bitcloutPublicKey === 'string'
-  )
-}
-
-/** Decorator to throw an error if endpoint is called without an identity */
-function signatureRequired(): MethodDecorator {
-  return function (
-    target: any,
-    key: string | symbol,
-    descriptor: PropertyDescriptor
-  ) {
-    const originalFunc = descriptor.value
-
-    descriptor.value = function (this: BitcloutClient, ...args: any[]) {
-      if (!this.identity?.canSign)
-        throw new NotAuthenticatedError(key as string)
-      else return (originalFunc as (...args: any[]) => any).apply(this, args)
-    }
-
-    return descriptor
-  }
-}
+import { signatureRequired, isIdentityInstance } from './util'
+import adminEndpoints from './adminEndpoints'
 
 /**
  * A BitClout node API client
@@ -50,6 +18,10 @@ function signatureRequired(): MethodDecorator {
  * @beta
  */
 export class BitcloutClient extends BaseClient {
+  // TODO this is not working. Typedoc is not expanding the object into a separate module thing, which we need it to do.
+  /** Node admin endpoints */
+  admin: typeof adminEndpoints
+
   /**
    * Initialize a BitClout node client
    * @param identityArg
@@ -120,6 +92,8 @@ export class BitcloutClient extends BaseClient {
       identity,
       ...(otherCfg || {}),
     })
+
+    this.admin = this.bindEndpointFunctions(adminEndpoints)
   }
 
   /* Endpoints */
@@ -203,15 +177,36 @@ export class BitcloutClient extends BaseClient {
   }
 
   /**
-   * Submit a post
+   * Send bitclout to another wallet
+   * @param recipient The BitClout public key OR username of the recipient
+   * @param amountNanos How many nanos of BitClout to send
+   * @returns The transaction result
    * @identityRequired
    */
   @signatureRequired()
-  public async submitPost(
+  public sendBitclout(recipient: string, amountNanos: number) {
+    return this.handleRequestWithTxn<api.SendBitcloutTxnResponse>(
+      'send-bitclout',
+      {
+        SenderPublicKeyBase58Check: this.identity!.bitcloutPublicKey,
+        RecipientPublicKeyOrUsername: recipient,
+        AmountNanos: amountNanos,
+        MinFeeRateNanosPerKB: 1000,
+      }
+    )
+  }
+
+  /**
+   * Submit a post
+   * @returns The transaction result
+   * @identityRequired
+   */
+  @signatureRequired()
+  public submitPost(
     /** Post body text */
     body: string
   ) {
-    return this.handleRequestForTxn<api.PostTxnResponse>('submit-post', {
+    return this.handleRequestWithTxn<api.PostTxnResponse>('submit-post', {
       UpdaterPublicKeyBase58Check: this.identity!.bitcloutPublicKey,
       BodyObj: {
         Body: body,
@@ -220,6 +215,127 @@ export class BitcloutClient extends BaseClient {
       MinFeeRateNanosPerKB: 1000,
     })
   }
+
+  @signatureRequired()
+  private followOrUnfollow(followed: string, unfollow: boolean) {
+    return this.handleRequestWithTxn<api.FollowTxnResponse>(
+      'create-follow-txn-stateless',
+      {
+        FollowerPublicKeyBase58Check: this.identity!.bitcloutPublicKey,
+        FollowedPublicKeyBase58Check: followed,
+        IsUnfollow: unfollow,
+        MinFeeRateNanosPerKB: 1000,
+      }
+    )
+  }
+
+  /**
+   * Follow a user.
+   * @param publicKey The public key of the user to follow
+   * @returns The follow transaction result
+   * @identityRequired
+   */
+  @signatureRequired()
+  public follow(publicKey: string) {
+    return this.followOrUnfollow(publicKey, false)
+  }
+
+  /**
+   * Unfollow a user.
+   * @param publicKey The public key of the user to unfollow
+   * @returns The follow transaction result
+   * @identityRequired
+   */
+  @signatureRequired()
+  public unfollow(publicKey: string) {
+    return this.followOrUnfollow(publicKey, true)
+  }
+
+  @signatureRequired()
+  private likeOrUnlike(postHash: string, unlike: boolean) {
+    return this.handleRequestWithTxn<api.LikeTxnResponse>(
+      'create-like-stateless',
+      {
+        ReaderPublicKeyBase58Check: this.identity!.bitcloutPublicKey,
+        LikedPostHashHex: postHash,
+        IsUnlike: unlike,
+        MinFeeRateNanosPerKB: 1000,
+      }
+    )
+  }
+
+  /**
+   * Like a post
+   * @param postHash The hash hex of the post to like
+   * @returns The like transaction result
+   * @identityRequired
+   */
+  @signatureRequired()
+  public like(postHash: string) {
+    return this.likeOrUnlike(postHash, false)
+  }
+
+  /**
+   * Unlike a post
+   * @param postHash The hash hex of the post to unlike
+   * @returns The like transaction result
+   * @identityRequired
+   */
+  @signatureRequired()
+  public unlike(postHash: string) {
+    return this.likeOrUnlike(postHash, true)
+  }
+
+  /**
+   * Transfers some creator coin to another wallet
+   * @param creator The Bitclout public key of the coin's creator
+   * @param recipient The Bitclout public key or username of the coin recipient
+   * @param coinNanos The amount of nanos of coin to transfer
+   * @returns The transfer transaction result
+   */
+  public transferCreatorCoin(
+    creator: string,
+    recipient: string,
+    coinNanos: number
+  ) {
+    return this.handleRequestWithTxn<api.TransferCreatorCoinTxnResponse>(
+      'transfer-creator-coin',
+      {
+        SenderPublicKeyBase58Check: this.identity!.bitcloutPublicKey,
+        CreatorPublicKeyBase58Check: creator,
+        ReceiverUsernameOrPublicKeyBase58Check: recipient,
+        CreatorCoinToTransferNanos: coinNanos,
+        MinFeeRateNanosPerKB: 1000,
+      }
+    )
+  }
+
+  /**
+   * Give diamonds to a post
+   * @param recipient The recipient of the diamonds (the creator of the post)
+   * @param postHash The post hash hex
+   * @param diamondLevel How many diamonds? Use {@link BitcloutClient.getAppState} to get the diamond tiers.
+   * @returns The diamond transaction result
+   * @identityRequired
+   */
+  @signatureRequired()
+  public sendDiamonds(
+    recipient: string,
+    postHash: string,
+    diamondLevel: number
+  ) {
+    return this.handleRequestWithTxn<api.SendDiamondsTxnResponse>(
+      'send-diamonds',
+      {
+        SenderPublicKeyBase58Check: this.identity!.bitcloutPublicKey,
+        ReceiverPublicKeyBase58Check: recipient,
+        DiamondPostHashHex: postHash,
+        DiamondLevel: diamondLevel,
+        MinFeeRateNanosPerKB: 1000,
+      }
+    )
+  }
+  /* MEDIA */
 
   /**
    * Uploads an image to the BitClout node from current identity

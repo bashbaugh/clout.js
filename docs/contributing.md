@@ -2,4 +2,6 @@
 
 Contributions are always welcome! Currently, we need the most help with implementing the remaining {@page Endpoints | endpoints} and tests.
 
-Please open an issue on GitHub before starting to "claim" a task, so that we don't have multiple people working on the same thing at the same time.
+Please open an issue on GitHub before starting to claim a task, so that we don't have multiple people working on the same thing at the same time.
+
+Please add tests for your code if you can, and run `yarn precommit` to test and format before commiting changes.

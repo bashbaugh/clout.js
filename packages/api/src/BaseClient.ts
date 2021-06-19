@@ -115,7 +115,8 @@ export class BaseClient {
   public async signAndSubmitTransaction<T extends Record<string, any>>(
     txn: string
   ): Promise<T> {
-    if (!this.identity?.canSign) throw new NotAuthenticatedError('signTransaction')
+    if (!this.identity?.canSign)
+      throw new NotAuthenticatedError('signTransaction')
     return this.submitTransaction(await this.identity.signTransaction(txn))
   }
 
@@ -126,7 +127,7 @@ export class BaseClient {
    * @param data JSON body (or query params for GET request)
    * @returns the second API response after signing and submitting
    */
-  public async handleRequestForTxn<T extends Record<string, any>>(
+  public async handleRequestWithTxn<T extends Record<string, any>>(
     endpoint: string,
     data?: Record<string, any>
   ): Promise<T> {

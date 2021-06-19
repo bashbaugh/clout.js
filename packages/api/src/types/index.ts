@@ -2,9 +2,7 @@ export * from './post'
 export * from './user'
 export * from './transaction'
 
-// Why weren't this files working as d.ts files...
-
-export interface Transaction<MetaType> {
+export interface Transaction<MetaType, ExtraType> {
   TxInputs: {
     TxID: number[]
     Index: number
@@ -16,7 +14,7 @@ export interface Transaction<MetaType> {
   /** Metadata about the transaction operation. **Most strings are base64 encoded**. */
   TxnMeta: MetaType
   PublicKey: string
-  ExtraData: any
+  ExtraData: ExtraType
   /** Transaction's ECDSA signature */
   Signature: {
     R: number
@@ -25,8 +23,11 @@ export interface Transaction<MetaType> {
   TxnTypeJSON: number // TODO map transaction type number to enum (and text)
 }
 
-export interface BaseTxnSubmissionResponse<TxnMetaType> {
-  Transaction: Transaction<TxnMetaType>
+export interface BaseTxnSubmissionResponse<
+  TxnMetaType = Record<string, never>,
+  TxnExtraType = null
+> {
+  Transaction: Transaction<TxnMetaType, TxnExtraType>
   TxnHashHex: string
 }
 

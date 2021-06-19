@@ -15,7 +15,8 @@
     "build": "yarn --cwd ./packages/api build",
     "test": "yarn --cwd ./packages/api test",
     "format": "prettier --write \"packages/**/*.ts\"",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "precommit": "yarn test && yarn format"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.2.1",
