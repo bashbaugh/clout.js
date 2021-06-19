@@ -130,7 +130,9 @@ export class WebAccount extends Identity {
     const { payload } = await WebAccount.waitForResponse(id)
 
     if (payload.approvalRequired && !skipApproval) {
-      const w = window.open(`https://identity.bitclout.com/approve?tx=${transactionHex}`)
+      const w = window.open(
+        `https://identity.bitclout.com/approve?tx=${transactionHex}`
+      )
       const signedTxn = (await WebAccount.waitForResponse(null as any))?.payload
         ?.signedTransactionHex
       w?.close()

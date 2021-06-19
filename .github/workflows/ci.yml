@@ -4,6 +4,8 @@ on:
   - push
   - pull_request
 
+# TODO this doesn't really do anything. Need to commit formatted changes, etc.
+
 jobs:
   ci:
     name: CI (node ${{ matrix.command }})

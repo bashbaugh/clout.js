@@ -1,3 +1,4 @@
+import { sign } from 'jsonwebtoken'
 import { satoshisToBitcoin } from '.'
 import { BaseClient, ClientConfig } from './BaseClient'
 import { InvalidConfigError, NotAuthenticatedError } from './errors'
@@ -18,7 +19,24 @@ function isIdentityInstance(obj: any): obj is Identity | ReadonlyIdentity {
   )
 }
 
-// TODO @signatureRequired decorator instead of checking each endpoint
+/** Decorator to throw an error if endpoint is called without an identity */
+function signatureRequired(): MethodDecorator {
+  return function (
+    target: any,
+    key: string | symbol,
+    descriptor: PropertyDescriptor
+  ) {
+    const originalFunc = descriptor.value
+
+    descriptor.value = function (this: BitcloutClient, ...args: any[]) {
+      if (!this.identity?.canSign)
+        throw new NotAuthenticatedError(key as string)
+      else return (originalFunc as (...args: any[]) => any).apply(this, args)
+    }
+
+    return descriptor
+  }
+}
 
 /**
  * A BitClout node API client
@@ -160,8 +178,10 @@ export class BitcloutClient extends BaseClient {
   /**
    * Update profile
    * @param updateFields Object of fields to update
-   * @needsIdentity
+   * @returns Information about the update transaction
+   * @identityRequired
    */
+  @signatureRequired()
   public async updateProfile(updateFields: api.UpdateProfileInput) {
     if (!this.identity?.canSign)
       throw new NotAuthenticatedError('updateProfile')
@@ -184,15 +204,15 @@ export class BitcloutClient extends BaseClient {
 
   /**
    * Submit a post
-   * @needsIdentity
+   * @identityRequired
    */
+  @signatureRequired()
   public async submitPost(
     /** Post body text */
     body: string
   ) {
-    if (!this.identity?.canSign) throw new NotAuthenticatedError('submitPost')
-    return this.handleTransactionRequest<api.PostTxnResponse>('submit-post', {
-      UpdaterPublicKeyBase58Check: this.identity.bitcloutPublicKey,
+    return this.handleRequestForTxn<api.PostTxnResponse>('submit-post', {
+      UpdaterPublicKeyBase58Check: this.identity!.bitcloutPublicKey,
       BodyObj: {
         Body: body,
       },
@@ -203,17 +223,17 @@ export class BitcloutClient extends BaseClient {
 
   /**
    * Uploads an image to the BitClout node from current identity
-   * @needsIdentity
+   * @identityRequired
    */
+  @signatureRequired()
   public async uploadImage(file: File) {
-    if (!this.identity?.canSign) throw new NotAuthenticatedError('uploadImage')
     const formData = new FormData()
     formData.append('file', file)
     formData.append(
       'UserPublicKeyBase58Check',
-      this.identity?.bitcloutPublicKey
+      this.identity!.bitcloutPublicKey
     )
-    formData.append('JWT', await this.identity.signJWT())
+    formData.append('JWT', await this.getJWT())
     return this.callApi<api.UploadImageResponse>('upload-image', formData)
   }
 

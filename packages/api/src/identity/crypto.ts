@@ -44,7 +44,7 @@ function uvarint64ToBuf(uint: number): Buffer {
   return Buffer.from(result)
 }
 /* tslint:enable:no-bitwise */
- 
+
 export function getBitcloutPublicKeyFromKeypair(
   keypair: EC.KeyPair,
   net: 'mainnet' | 'testnet'
@@ -96,17 +96,24 @@ export function signJWT(seedHex: string, data: any = {}) {
  * @param publicKey A BitClout public to validate the JWT against
  * @returns The JWT payload, if verification was succesful.
  */
-export function validateJWT(jwt: string, publicKey: string): jsonwebtoken.JwtPayload {
+export function validateJWT(
+  jwt: string,
+  publicKey: string
+): jsonwebtoken.JwtPayload {
   let pubKey: string
   try {
-    pubKey = encoder.encodePublic(decodeBitcloutPublicKey(publicKey).getPublic('hex'), 'raw', 'pem')
+    pubKey = encoder.encodePublic(
+      decodeBitcloutPublicKey(publicKey).getPublic('hex'),
+      'raw',
+      'pem'
+    )
   } catch (e) {
     throw new JWTValidationError(`Invalid public key ${publicKey}`)
   }
 
   try {
     return jsonwebtoken.verify(jwt, pubKey, {
-      algorithms: ['ES256']
+      algorithms: ['ES256'],
     }) as any
   } catch (e) {
     throw new JWTValidationError('Unable to decode or verify JWT')

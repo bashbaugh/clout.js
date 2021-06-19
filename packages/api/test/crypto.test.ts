@@ -1,14 +1,16 @@
 import { expect } from 'chai'
 import { JWTValidationError, SeedAccount } from '../src'
-import { 
-  decodeBitcloutPublicKey, 
-  getBitcloutPublicKeyFromKeypair, 
-  getKeypairFromMnemonic, 
-  validateJWT 
+import {
+  decodeBitcloutPublicKey,
+  getBitcloutPublicKeyFromKeypair,
+  getKeypairFromMnemonic,
+  validateJWT,
 } from '../src/identity'
 
-const aPhrase = 'outside seven reunion sniff mimic skull pulp twist twice elegant replace luggage'
-const bPhrase = 'source wink idea genuine upper better wood fault solve reform doll gown'
+const aPhrase =
+  'outside seven reunion sniff mimic skull pulp twist twice elegant replace luggage'
+const bPhrase =
+  'source wink idea genuine upper better wood fault solve reform doll gown'
 
 const a = new SeedAccount(aPhrase)
 const b = new SeedAccount(bPhrase)
@@ -32,7 +34,9 @@ describe('Crypto:', () => {
     })
 
     it('should throw a JWTValidationError', () => {
-      expect(() => validateJWT(aJWT, b.bitcloutPublicKey)).to.throw('Unable to decode or verify JWT')
+      expect(() => validateJWT(aJWT, b.bitcloutPublicKey)).to.throw(
+        'Unable to decode or verify JWT'
+      )
     })
   })
 })

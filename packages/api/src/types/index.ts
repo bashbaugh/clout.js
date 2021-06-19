@@ -19,7 +19,7 @@ export interface Transaction<MetaType> {
   ExtraData: any
   /** Transaction's ECDSA signature */
   Signature: {
-    R: number,
+    R: number
     S: number
   }
   TxnTypeJSON: number // TODO map transaction type number to enum (and text)

@@ -115,7 +115,7 @@ export class BaseClient {
   public async signAndSubmitTransaction<T extends Record<string, any>>(
     txn: string
   ): Promise<T> {
-    if (!this.identity?.canSign) throw new NotAuthenticatedError('transaction')
+    if (!this.identity?.canSign) throw new NotAuthenticatedError('signTransaction')
     return this.submitTransaction(await this.identity.signTransaction(txn))
   }
 
@@ -126,11 +126,17 @@ export class BaseClient {
    * @param data JSON body (or query params for GET request)
    * @returns the second API response after signing and submitting
    */
-  public async handleTransactionRequest<T extends Record<string, any>>(
+  public async handleRequestForTxn<T extends Record<string, any>>(
     endpoint: string,
     data?: Record<string, any>
   ): Promise<T> {
     const response = await this.callApi(endpoint, data)
     return await this.signAndSubmitTransaction<T>(response.TransactionHex)
+  }
+
+  /** Get a JWT from the identity instance */
+  protected getJWT() {
+    if (!this.identity?.canSign) throw new NotAuthenticatedError('getJWT')
+    return this.identity.signJWT()
   }
 }
