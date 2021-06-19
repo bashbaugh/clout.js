@@ -4,7 +4,7 @@
   "replaceGlobalsPage": false,
   "groups": [
     {
-      "title": "Documentation",
+      "title": "API Documentation",
       "pages": [
         {
           "title": "Getting Started",
@@ -27,6 +27,14 @@
         {
           "title": "Utilities",
           "source": "./docs/utilities.md"
+        }
+      ]
+    }, {
+      "title": "Event Hooks",
+      "pages": [
+        {
+          "title": "Getting Started",
+          "source": "./docs/hooks-start.md"
         }
       ]
     }, {

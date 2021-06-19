@@ -1,0 +1,3 @@
+
+/** Test */
+export const test = () => ''

@@ -1,6 +1,7 @@
 {
   "entryPoints": [
-    "packages/api/src/index.ts"
+    "packages/api/src/index.ts",
+    "packages/hooks/src/index.ts"
   ],
   "out": "docs-out",
   "includeVersion": true,

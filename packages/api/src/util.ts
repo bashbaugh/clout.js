@@ -19,7 +19,7 @@ export function isIdentityInstance(
 }
 
 /** Decorator to throw an error if endpoint is called without an identity */
-export function signatureRequired(): MethodDecorator {
+export function requireSignature(): MethodDecorator {
   return function (
     target: any,
     key: string | symbol,

@@ -3,7 +3,7 @@ import { BaseClient, ClientConfig } from './BaseClient'
 import { InvalidConfigError, NotAuthenticatedError } from './errors'
 import { Identity, ReadonlyIdentity, SeedAccount, WebAccount } from './identity'
 import * as api from './types'
-import { signatureRequired, isIdentityInstance } from './util'
+import { requireSignature, isIdentityInstance } from './util'
 import adminEndpoints from './adminEndpoints'
 
 /**
@@ -155,7 +155,7 @@ export class BitcloutClient extends BaseClient {
    * @returns Information about the update transaction
    * @identityRequired
    */
-  @signatureRequired()
+  @requireSignature()
   public async updateProfile(updateFields: api.UpdateProfileInput) {
     if (!this.identity?.canSign)
       throw new NotAuthenticatedError('updateProfile')
@@ -183,7 +183,7 @@ export class BitcloutClient extends BaseClient {
    * @returns The transaction result
    * @identityRequired
    */
-  @signatureRequired()
+  @requireSignature()
   public sendBitclout(recipient: string, amountNanos: number) {
     return this.handleRequestWithTxn<api.SendBitcloutTxnResponse>(
       'send-bitclout',
@@ -201,7 +201,7 @@ export class BitcloutClient extends BaseClient {
    * @returns The transaction result
    * @identityRequired
    */
-  @signatureRequired()
+  @requireSignature()
   public submitPost(
     /** Post body text */
     body: string
@@ -216,7 +216,7 @@ export class BitcloutClient extends BaseClient {
     })
   }
 
-  @signatureRequired()
+  @requireSignature()
   private followOrUnfollow(followed: string, unfollow: boolean) {
     return this.handleRequestWithTxn<api.FollowTxnResponse>(
       'create-follow-txn-stateless',
@@ -235,7 +235,7 @@ export class BitcloutClient extends BaseClient {
    * @returns The follow transaction result
    * @identityRequired
    */
-  @signatureRequired()
+  @requireSignature()
   public follow(publicKey: string) {
     return this.followOrUnfollow(publicKey, false)
   }
@@ -246,12 +246,12 @@ export class BitcloutClient extends BaseClient {
    * @returns The follow transaction result
    * @identityRequired
    */
-  @signatureRequired()
+  @requireSignature()
   public unfollow(publicKey: string) {
     return this.followOrUnfollow(publicKey, true)
   }
 
-  @signatureRequired()
+  @requireSignature()
   private likeOrUnlike(postHash: string, unlike: boolean) {
     return this.handleRequestWithTxn<api.LikeTxnResponse>(
       'create-like-stateless',
@@ -270,7 +270,7 @@ export class BitcloutClient extends BaseClient {
    * @returns The like transaction result
    * @identityRequired
    */
-  @signatureRequired()
+  @requireSignature()
   public like(postHash: string) {
     return this.likeOrUnlike(postHash, false)
   }
@@ -281,7 +281,7 @@ export class BitcloutClient extends BaseClient {
    * @returns The like transaction result
    * @identityRequired
    */
-  @signatureRequired()
+  @requireSignature()
   public unlike(postHash: string) {
     return this.likeOrUnlike(postHash, true)
   }
@@ -318,7 +318,7 @@ export class BitcloutClient extends BaseClient {
    * @returns The diamond transaction result
    * @identityRequired
    */
-  @signatureRequired()
+  @requireSignature()
   public sendDiamonds(
     recipient: string,
     postHash: string,
@@ -341,7 +341,7 @@ export class BitcloutClient extends BaseClient {
    * Uploads an image to the BitClout node from current identity
    * @identityRequired
    */
-  @signatureRequired()
+  @requireSignature()
   public async uploadImage(file: File) {
     const formData = new FormData()
     formData.append('file', file)

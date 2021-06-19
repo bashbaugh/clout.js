@@ -1,0 +1,27 @@
+{
+  "name": "@cloutjs/hooks",
+  "version": "0.1.0",
+  "description": "BlockCypher client for monitoring BitClout node events",
+  "author": "Benjamin Ashbaugh <hi@benjaminashbaugh.me>",
+  "homepage": "https://cloutjs.bweb.app",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.yarnpkg.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bashbaugh/clout.js.git"
+  },
+  "scripts": {
+    "test": "mocha test ./test/**/*.ts --recursive -r ts-node/register --reporter nyan",
+    "build": "rm -rf dist && rollup --config rollup.config.js"
+  },
+  "bugs": {
+    "url": "https://github.com/bashbaugh/clout.js/issues"
+  }
+}
